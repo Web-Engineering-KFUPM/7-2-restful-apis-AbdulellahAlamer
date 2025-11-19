@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-dotenv.config();
+// Load env from project root config.env
+dotenv.config({ path: "../config.env" });
 
 import { connectDB } from "./db.js";
 import { Song } from "./models/song.model.js";
@@ -12,10 +13,14 @@ const PORT = process.env.PORT || 5174;
 app.use(cors());
 app.use(express.json());
 
-const mongoURI = process.env.MONGO_URL.replace(
+const mongoURI = process.env.MONGO_URL?.replace(
   "<password>",
   process.env.MONGO_PASSWORD
 );
+
+if (!mongoURI) {
+  throw new Error("Missing MONGO_URL or MONGO_PASSWORD in config.env");
+}
 
 await connectDB(mongoURI);
 
@@ -24,6 +29,17 @@ await connectDB(mongoURI);
 app.get("/api/songs", async (req, res) => {
   try {
     const songs = await Song.find();
+    res.json(songs);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch songs" });
+  }
+});
+
+// get one song
+app.get("/api/songs/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const songs = await Song.findById(id);
     res.json(songs);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch songs" });

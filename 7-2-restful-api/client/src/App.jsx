@@ -205,21 +205,21 @@ export default function App() {
     }
   };
 
-  const onEdit = async (id) => {
-    setEditingId(id);
+  const onEdit = async (_id) => {
+    setEditingId(_id);
     try {
-      const s = await apiGetSong(id);
+      const s = await apiGetSong(_id);
       setEditingSong(s);
     } catch (e) {
       showToast(e.message, "error");
     }
   };
 
-  const onSave = async (id, payload) => {
+  const onSave = async (_id, payload) => {
     setSaving(true);
     try {
-      const upd = await apiUpdateSong(id, payload);
-      setSongs((arr) => arr.map(s => s.id === id ? upd : s));
+      const upd = await apiUpdateSong(_id, payload);
+      setSongs((arr) => arr.map(s => s._id === _id ? upd : s));
       setEditingId(null);
       setEditingSong(null);
       showToast("Saved.");
@@ -230,11 +230,11 @@ export default function App() {
     }
   };
 
-  const onDelete = async (id) => {
+  const onDelete = async (_id) => {
     if (!confirm("Delete this song?")) return;
     try {
-      await apiDeleteSong(id);
-      setSongs((arr) => arr.filter(s => s.id !== id));
+      await apiDeleteSong(_id);
+      setSongs((arr) => arr.filter(s => s._id !== _id));
       showToast("Deleted.");
     } catch (e) {
       showToast(e.message, "error");
