@@ -2,7 +2,12 @@ import { useEffect, useState } from "react";
 import React from "react";
 
 export default function EditDialog({ open, song, onClose, onSave, saving }) {
-  const [form, setForm] = useState({ _id: "", title: "", artist: "", year: "" });
+  const [form, setForm] = useState({
+    _id: "",
+    title: "",
+    artist: "",
+    year: "",
+  });
 
   useEffect(() => {
     if (song) {

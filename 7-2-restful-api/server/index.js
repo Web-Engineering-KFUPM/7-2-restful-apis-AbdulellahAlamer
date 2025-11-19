@@ -22,13 +22,19 @@ if (!mongoURI) {
   throw new Error("Missing MONGO_URL or MONGO_PASSWORD in config.env");
 }
 
-await connectDB(mongoURI);
+try {
+  await connectDB(mongoURI);
+  console.log("Mongo connected");
+} catch (err) {
+  console.error("Connection error:", err.message);
+  process.exit(1);
+}
 
 // api/songs (Read all songs)
-// Return all songs
+// Return all songs (newest first)
 app.get("/api/songs", async (req, res) => {
   try {
-    const songs = await Song.find();
+    const songs = await Song.find().sort({ createdAt: -1 });
     res.json(songs);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch songs" });
@@ -39,10 +45,13 @@ app.get("/api/songs", async (req, res) => {
 app.get("/api/songs/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const songs = await Song.findById(id);
-    res.json(songs);
+    const song = await Song.findById(id);
+    if (!song) {
+      return res.status(404).json({ error: "Song not found" });
+    }
+    res.json(song);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch songs" });
+    res.status(500).json({ error: "Failed to fetch song" });
   }
 });
 
@@ -90,7 +99,7 @@ app.delete("/api/songs/:id", async (req, res) => {
     if (!song) {
       return res.status(404).json({ error: "Song not found" });
     }
-    res.json({ message: "Song deleted" });
+    res.status(204).end();
   } catch (err) {
     res.status(500).json({ error: "Failed to delete song" });
   }
